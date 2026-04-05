@@ -12,17 +12,17 @@
     <header>
         <ul class="navbar-nav me-auto">
             @if (User.Identity!.IsAuthenticated)
-            {
-                <li class="nav-item">
-                    <a class="nav-link" asp-controller="Expense" asp-action="Index">
-                        My Expenses
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" asp-controller="Dashboard" asp-action="Index">
-                        Dashboard
-                    </a>
-                </li>
+            {@if (User.IsInRole("Admin"))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link text-danger fw-bold"
+                           asp-area="Admin"
+                           asp-controller="Home"
+                           asp-action="Index">
+                            Admin Panel
+                        </a>
+                    </li>
+                }
             }
         </ul>
         <ul class="navbar-nav ms-auto">

@@ -1,0 +1,84 @@
+﻿@model Spendly.Areas.Admin.Models.AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<h4 class="fw-bold mb-4">Admin Dashboard</h4>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card border-0 bg-primary text-white">
+            <div class="card-body">
+                <p class="small opacity-75 mb-1">Total Users</p>
+                <h3 class="fw-bold mb-0">@Model.TotalUsers</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 bg-success text-white">
+            <div class="card-body">
+                <p class="small opacity-75 mb-1">Total Expenses</p>
+                <h3 class="fw-bold mb-0">@Model.TotalExpenses</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 bg-warning text-white">
+            <div class="card-body">
+                <p class="small opacity-75 mb-1">Total Amount (All Users)</p>
+                <h3 class="fw-bold mb-0">৳@Model.TotalAmountAllUsers.ToString("N2")</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h6 class="fw-bold mb-3">All Users</h6>
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th class="text-center">Expenses</th>
+                    <th class="text-end">Total Spent</th>
+                    <th>Last Expense</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var u in Model.UserSummaries)
+                {
+                    <tr>
+                        <td class="fw-bold">@u.FullName</td>
+                        <td class="text-muted small">@u.Email</td>
+                        <td class="text-center">@u.ExpenseCount</td>
+                        <td class="text-end">৳@u.TotalSpent.ToString("N2")</td>
+                        <td class="text-muted small">
+                            @(u.LastExpenseDate.HasValue
+                                                    ? u.LastExpenseDate.Value.ToString("dd MMM yyyy")
+                                                    : "No expenses")
+                    </td>
+                    <td class="text-end">
+                        <a asp-action="UserExpenses"
+                           asp-route-userId="@u.UserId"
+                           class="btn btn-sm btn-outline-primary">
+                            View
+                        </a>
+                        <form asp-action="DeleteUser"
+                              asp-route-userId="@u.UserId"
+                              method="post" class="d-inline"
+                              onsubmit="return confirm('Delete this user and all their data?')">
+                            <button type="submit"
+                                    class="btn btn-sm btn-outline-danger">
+                                Delete
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                                }
+            </tbody>
+        </table>
+    </div>
+</div>
