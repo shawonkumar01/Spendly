@@ -1,4 +1,159 @@
-﻿@{
+﻿@model Spendly.ViewModels.DashboardViewModel
+@{
     ViewData["Title"] = "Dashboard";
 }
-<h4 class="fw-bold">Dashboard — coming soon!</h4>
+
+<!-- Summary Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 bg-primary text-white shadow-sm">
+            <div class="card-body">
+                <p class="small mb-1 opacity-75">This Month</p>
+                <h4 class="fw-bold mb-0">৳@Model.TotalThisMonth.ToString("N2")</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 bg-secondary text-white shadow-sm">
+            <div class="card-body">
+                <p class="small mb-1 opacity-75">Last Month</p>
+                <h4 class="fw-bold mb-0">৳@Model.TotalLastMonth.ToString("N2")</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 bg-success text-white shadow-sm">
+            <div class="card-body">
+                <p class="small mb-1 opacity-75">This Year</p>
+                <h4 class="fw-bold mb-0">৳@Model.TotalThisYear.ToString("N2")</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 bg-info text-white shadow-sm">
+            <div class="card-body">
+                <p class="small mb-1 opacity-75">Total Records</p>
+                <h4 class="fw-bold mb-0">@Model.TotalExpensesCount</h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row g-3 mb-4">
+    <div class="col-md-8">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="fw-bold mb-3">Spending — Last 6 Months</h6>
+                <canvas id="barChart" height="120"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="fw-bold mb-3">This Month by Category</h6>
+                @if (Model.CategoryNames.Any())
+                {
+                    <canvas id="pieChart"></canvas>
+                }
+                else
+                {
+                    <p class="text-muted text-center mt-4">No data this month.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Expenses -->
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="fw-bold mb-0">Recent Expenses</h6>
+            <a asp-controller="Expense" asp-action="Index"
+               class="btn btn-sm btn-outline-primary">View All</a>
+        </div>
+        <table class="table table-hover mb-0">
+            <tbody>
+                @foreach (var e in Model.RecentExpenses)
+                {
+                    <tr>
+                        <td>
+                            <span class="badge me-2"
+                                  style="background-color:@e.CategoryColor">
+                                @e.CategoryName
+                            </span>
+                            @e.Title
+                        </td>
+                        <td class="text-muted small">
+                            @e.Date.ToString("dd MMM yyyy")
+                        </td>
+                        <td class="text-end fw-bold">
+                            ৳@e.Amount.ToString("N2")
+                        </td>
+                    </tr>
+                }
+                @if (!Model.RecentExpenses.Any())
+                {
+                    <tr>
+                        <td colspan="3" class="text-center text-muted py-3">
+                            No expenses yet.
+                            <a asp-controller="Expense" asp-action="Create">
+                                Add your first one!
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        // Bar chart
+        new Chart(document.getElementById('barChart'), {
+            type: 'bar',
+            data: {
+                labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthLabels)),
+                datasets: [{
+                    label: 'Total Spent (৳)',
+                    data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthTotals)),
+                    backgroundColor: '#0d6efd',
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+
+        // Pie chart
+        @if (Model.CategoryNames.Any())
+        {
+                <text>
+                new Chart(document.getElementById('pieChart'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.CategoryNames)),
+                        datasets: [{
+                            data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.CategoryTotals)),
+                            backgroundColor: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.CategoryColors)),
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { boxWidth: 12 } }
+                        }
+                    }
+                });
+                </text>
+        }
+    </script>
+}
