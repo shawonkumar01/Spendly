@@ -7,6 +7,8 @@ using Spendly.Repositories;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IExpenseRepository, ExpenseRepository>();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -38,6 +40,11 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();
